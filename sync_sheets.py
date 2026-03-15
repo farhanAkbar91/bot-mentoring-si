@@ -1,10 +1,23 @@
+import os
+import json
 import gspread
 from google.oauth2.service_account import Credentials # Menggunakan library yang didukung Google
 from database import SessionLocal, Lomba, Mentor, FAQ
 
-# Setup Google Sheets API
-scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
+# 1. Ambil string JSON dari Environment Variable
+creds_json_str = os.getenv("GOOGLE_CREDS_JSON")
+
+# 2. Ubah string tersebut kembali menjadi dictionary (objek Python)
+creds_info = json.loads(creds_json_str)
+
+# 3. Tentukan scope yang dibutuhkan
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# 4. Gunakan 'from_service_account_info' (BUKAN from_service_account_file)
+creds = Credentials.from_service_account_info(creds_info, scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet = client.open("data bot-aa")
