@@ -14,6 +14,7 @@ from groq import AsyncGroq
 from dotenv import load_dotenv
 from sync_sheets import sync_data
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aiohttp import web
 
 load_dotenv()
 
@@ -304,15 +305,27 @@ async def handle_faq(message: types.Message):
         logging.error(f"Error FAQ: {e}")
         await message.answer("Maaf, saya sedang kesulitan memproses informasi tersebut.")
 
+# Tambahkan fungsi health check sederhana
+async def handle_health_check(request):
+    return web.Response(text="Bot is running!")
+
 async def main():
     logging.basicConfig(level=logging.INFO)
     
-    # Inisialisasi Scheduler
+    # Inisialisasi Scheduler (seperti yang kita bahas sebelumnya)
     scheduler = AsyncIOScheduler()
-    # Atur agar mengecek setiap hari pada jam 08:00 pagi
     scheduler.add_job(check_deadlines, 'cron', hour=8, minute=0)
     scheduler.start()
-    
+
+    # --- TAMBAHAN UNTUK RENDER ---
+    app = web.Application()
+    app.router.add_get("/", handle_health_check)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", int(os.getenv("PORT", 8080)))
+    await site.start()
+    # -----------------------------
+
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
