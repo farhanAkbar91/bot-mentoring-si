@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from sync_sheets import sync_data
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiohttp import web
+from aiogram.client.session.aiohttp import AiohttpSession
 
 load_dotenv()
 
@@ -24,7 +25,9 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 ADMIN_ID = os.getenv("ADMIN_ID")
 
-bot = Bot(token=TOKEN)
+# Berikan batas waktu 60 detik agar koneksi tidak cepat putus
+custom_session = AiohttpSession(timeout=60.0) 
+bot = Bot(token=TOKEN, session=custom_session)
 dp = Dispatcher()
 groq_client = AsyncGroq(api_key=GROQ_API_KEY) # ✅ 1. Inisialisasi Async
 
