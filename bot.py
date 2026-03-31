@@ -16,6 +16,7 @@ from sync_sheets import sync_data
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiohttp import web
 from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 load_dotenv()
 
@@ -319,24 +320,62 @@ async def handle_faq(message: types.Message):
 async def handle_health_check(request):
     return web.Response(text="Bot is running!")
 
+# --- CONFIG WEBHOOK ---
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST") 
+WEBHOOK_PATH = f"/webhook/{TOKEN}"
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+# Setup web server untuk Webhook
+app = web.Application()
+
+# ... (Kode di atasnya tetap sama) ...
+
+async def on_startup(bot: Bot):
+    # ✅ Tambahkan drop_pending_updates=True agar pesan lama yang nyangkut dihapus
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+    logging.info(f"Webhook set to {WEBHOOK_URL}")
+
+async def on_shutdown(bot: Bot):
+    logging.warning("Shutting down..")
+    await bot.delete_webhook()
+
 async def main():
     logging.basicConfig(level=logging.INFO)
     
-    # Inisialisasi Scheduler (seperti yang kita bahas sebelumnya)
+    # Inisialisasi Scheduler
     scheduler = AsyncIOScheduler()
     scheduler.add_job(check_deadlines, 'cron', hour=8, minute=0)
     scheduler.start()
 
-    # --- TAMBAHAN UNTUK RENDER ---
-    app = web.Application()
+    # Daftarkan startup/shutdown actions
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+
+    # Hubungkan Aiogram dengan Aiohttp
+    webhook_requests_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+    )
+    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
+    setup_application(app, dp, bot=bot)
+
+    # ✅ DAFTARKAN HEALTH CHECK DI SINI
     app.router.add_get("/", handle_health_check)
+
+    # Jalankan Web Server
+    port = int(os.getenv("PORT", 8080))
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(os.getenv("PORT", 8080)))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    
+    logging.info(f"Starting web application on port {port}...")
     await site.start()
-    # -----------------------------
 
-    await dp.start_polling(bot)
+    # Biarkan server terus berjalan
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bot stopped!")
