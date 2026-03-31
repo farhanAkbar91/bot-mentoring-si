@@ -42,19 +42,26 @@ def main_menu():
     return builder.as_markup()
 
 # --- HANDLERS ---
+import traceback # Tambahkan di bagian atas file
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     
-    # ✅ 2. Context Manager: Otomatis menutup koneksi DB meskipun error
-    with SessionLocal() as db:
-        user = db.query(User).filter(User.telegram_id == str(message.from_user.id)).first()
+    try:
+        with SessionLocal() as db:
+            user = db.query(User).filter(User.telegram_id == str(message.from_user.id)).first()
 
-    if not user:
-        await state.set_state(BotStates.waiting_for_nim)
-        await message.answer(f"Halo {message.from_user.first_name}! 👋\n\nSilakan masukkan **NIM** Anda (khusus mahasiswa SI) untuk verifikasi:")
-    else:
-        await message.answer(f"Selamat datang kembali, {user.nama}! Ada yang bisa dibantu?", reply_markup=main_menu())
+        if not user:
+            await state.set_state(BotStates.waiting_for_nim)
+            await message.answer(f"Halo {message.from_user.first_name}! 👋\n\nSilakan masukkan **NIM** Anda (khusus mahasiswa SI) untuk verifikasi:")
+        else:
+            await message.answer(f"Selamat datang kembali, {user.nama}! Ada yang bisa dibantu?", reply_markup=main_menu())
+            
+    except Exception as e:
+        # Jika DB gagal connect, bot akan membalas pesan error ini ke Telegram kamu
+        error_msg = f"Aduh, gagal konek ke Database nih:\n{str(e)[:500]}"
+        await message.answer(error_msg)
 
 @dp.message(BotStates.waiting_for_nim)
 async def process_nim(message: types.Message, state: FSMContext):
