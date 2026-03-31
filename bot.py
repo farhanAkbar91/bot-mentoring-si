@@ -68,6 +68,32 @@ async def cmd_start(message: types.Message, state: FSMContext):
         error_msg = f"Aduh, gagal konek ke Database nih:\n{str(e)[:500]}"
         await message.answer(error_msg)
 
+@dp.message(Command("sync"))
+async def cmd_sync(message: types.Message):
+    admin_env = os.getenv("ADMIN_ID", "")
+    daftar_admin = [admin.strip() for admin in admin_env.split(",")]
+
+    # Cek Gatekeeper: Tolak jika ID Telegram pengirim tidak ada di daftar
+    if str(message.from_user.id) not in daftar_admin:
+        await message.answer("⚠️ Maaf, perintah ini khusus untuk akses Admin/Staf HIMA.")
+        return
+
+    # Jika lolos pengecekan, jalankan sinkronisasi
+    m = await message.answer("🔄 Sedang menyinkronkan data Lomba, Mentor, dan FAQ dari Google Sheets...")
+    
+    try:
+        # Jalankan fungsi sync yang sudah diperbaiki tadi
+        hasil = sync_data() 
+        
+        if hasil:
+            await m.edit_text("✅ Sinkronisasi berhasil! Database Supabase kini menggunakan data terbaru.")
+        else:
+            await m.edit_text("❌ Sinkronisasi gagal. Cek log server untuk detailnya.")
+            
+    except Exception as e:
+        logging.error(f"Gagal sync via command: {e}")
+        await m.edit_text(f"❌ Terjadi kesalahan sistem saat sinkronisasi:\n`{str(e)[:200]}`", parse_mode="Markdown")
+
 @dp.message(BotStates.waiting_for_nim)
 async def process_nim(message: types.Message, state: FSMContext):
     nim = message.text.strip()
@@ -316,32 +342,6 @@ async def handle_faq(message: types.Message):
     except Exception as e:
         logging.error(f"Error FAQ: {e}")
         await message.answer("Maaf, saya sedang kesulitan memproses informasi tersebut.")
-
-@dp.message(Command("sync"))
-async def cmd_sync(message: types.Message):
-    admin_env = os.getenv("ADMIN_ID", "")
-    daftar_admin = [admin.strip() for admin in admin_env.split(",")]
-
-    # Cek Gatekeeper: Tolak jika ID Telegram pengirim tidak ada di daftar
-    if str(message.from_user.id) not in daftar_admin:
-        await message.answer("⚠️ Maaf, perintah ini khusus untuk akses Admin/Staf HIMA.")
-        return
-
-    # Jika lolos pengecekan, jalankan sinkronisasi
-    m = await message.answer("🔄 Sedang menyinkronkan data Lomba, Mentor, dan FAQ dari Google Sheets...")
-    
-    try:
-        # Jalankan fungsi sync yang sudah diperbaiki tadi
-        hasil = sync_data() 
-        
-        if hasil:
-            await m.edit_text("✅ Sinkronisasi berhasil! Database Supabase kini menggunakan data terbaru.")
-        else:
-            await m.edit_text("❌ Sinkronisasi gagal. Cek log server untuk detailnya.")
-            
-    except Exception as e:
-        logging.error(f"Gagal sync via command: {e}")
-        await m.edit_text(f"❌ Terjadi kesalahan sistem saat sinkronisasi:\n`{str(e)[:200]}`", parse_mode="Markdown")
 
 # Tambahkan fungsi health check sederhana
 async def handle_health_check(request):
