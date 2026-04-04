@@ -1,48 +1,48 @@
-# 🤖 Bot Mentoring AI - HIMSI SI UNAIR
+# 🤖 AI Mentoring Bot - HIMSI Information Systems UNAIR
 
-Sistem asisten digital berbasis Telegram yang dirancang untuk memfasilitasi mentoring lomba dan pusat informasi (FAQ) bagi mahasiswa Sistem Informasi Universitas Airlangga.
+A Telegram-based digital assistant designed to facilitate competition mentoring and provide an information hub (FAQ) for Information Systems students at Universitas Airlangga.
 
-Bot ini menggunakan kecerdasan buatan (AI) sebagai *gatekeeper* untuk melakukan seleksi awal terhadap mahasiswa yang ingin mengakses mentor, sehingga proses mentoring menjadi lebih terarah dan efisien.
+This bot leverages artificial intelligence (AI) as a *gatekeeper* to evaluate and filter mentoring requests, ensuring that access to mentors is more structured, relevant, and efficient.
 
 ---
 
 ## 📌 Project Overview
 
-Dalam lingkungan akademik, terdapat beberapa permasalahan utama:
-- Sulitnya akses terstruktur ke mentor lomba
-- Banyaknya pertanyaan berulang terkait lomba dan administrasi
-- Distribusi informasi yang tidak efisien
+In academic environments, several challenges commonly arise:
+- Difficulty in accessing structured mentoring for competitions
+- Repetitive questions regarding competitions and administrative processes
+- Inefficient information distribution by student organizations
 
-**Solusi yang ditawarkan:**
-- AI digunakan untuk menyaring permintaan mentoring berdasarkan kualitas alasan
-- FAQ otomatis untuk mengurangi beban pengurus
-- Integrasi Google Sheets untuk memudahkan pengelolaan data oleh non-developer
+**Proposed solution:**
+- AI filters mentoring requests based on quality and intent
+- Automated FAQ reduces repetitive inquiries
+- Google Sheets integration enables non-technical staff to manage data easily
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Key Features
 
-- 🔐 **Verifikasi NIM**  
-  Akses hanya untuk mahasiswa Sistem Informasi UNAIR
+- 🔐 **Student Verification (NIM-based)**  
+  Restricted access for Information Systems students only
 
 - 🧠 **AI Gatekeeper (Llama 3.1 - Groq)**  
-  Mengevaluasi kelayakan permintaan mentor (ACCEPT / REJECT + alasan)
+  Evaluates mentoring requests (ACCEPT / REJECT + reasoning)
 
 - 📚 **Dynamic FAQ System**  
-  Menjawab pertanyaan berdasarkan basis pengetahuan yang terus diperbarui
+  Answers questions based on continuously updated knowledge base
 
-- 🏆 **Informasi Lomba Terintegrasi**  
-  Menampilkan daftar dan detail lomba secara real-time
+- 🏆 **Competition Information System**  
+  Provides real-time competition listings and details
 
-- 🔄 **Sinkronisasi Google Sheets ↔ Database**  
-  Memungkinkan update data tanpa menyentuh kode
+- 🔄 **Google Sheets ↔ Database Synchronization**  
+  Enables easy data updates without modifying code
 
 - ⚡ **Rate Limiting & Anti-Spam**  
-  Melindungi API dari penyalahgunaan
+  Protects API usage and prevents abuse
 
 ---
 
-## 🧩 Arsitektur Sistem
+## 🧩 System Architecture
 
 ```
 
@@ -57,97 +57,96 @@ Backend Logic
 Database (Supabase)
 ↓
 Google Sheets (Data Source)
+```
 
-````
-
-**Catatan:**
-- Google Sheets digunakan sebagai *source of truth* untuk data dinamis (FAQ & lomba)
-- Supabase digunakan sebagai storage utama untuk sistem
+**Notes:**
+- Google Sheets acts as the *source of truth* for dynamic data (FAQ & competitions)
+- Supabase is used as the primary database for system operations
 
 ---
 
-## 💬 Command Utama
+## 💬 Main Commands
 
-| Command          | Deskripsi |
-|------------------|----------|
-| `/start`         | Memulai bot & verifikasi user |
-| `/faq`           | Menampilkan FAQ |
-| `/list_lomba`    | Menampilkan daftar lomba |
-| `/detail_lomba`  | Detail lomba tertentu |
-| `/req_mentor`    | Mengajukan permintaan mentoring |
-| `/sync` (admin)  | Sinkronisasi data dari Google Sheets |
+| Command          | Description |
+|------------------|------------|
+| `/start`         | Initialize bot & verify user |
+| `/faq`           | Display frequently asked questions |
+| `/list_lomba`    | Show available competitions |
+| `/detail_lomba`  | Show competition details |
+| `/req_mentor`    | Submit mentoring request |
+| `/sync` (admin)  | Sync data from Google Sheets |
 
 ---
 
 ## 🧠 AI Gatekeeper Logic
 
-Model digunakan untuk mengevaluasi permintaan mentoring berdasarkan:
+The model evaluates mentoring requests based on:
 
-- Kejelasan tujuan mengikuti lomba
-- Tingkat keseriusan dan effort
-- Relevansi kebutuhan mentoring
+- Clarity of the user's goals
+- Level of seriousness and effort
+- Relevance of the mentoring request
 
 **Output:**
-- ✅ `ACCEPT` → User mendapatkan akses ke mentor
-- ❌ `REJECT` → User diarahkan ke FAQ atau sumber lain  
-- 📝 Disertai alasan dari AI untuk transparansi
+- ✅ `ACCEPT` → User is granted access to mentor
+- ❌ `REJECT` → User is redirected to FAQ or alternative resources  
+- 📝 Includes reasoning for transparency
 
 ---
 
-## 🗄️ Struktur Data
+## 🗄️ Data Structure
 
-Database menyimpan:
+The database stores:
 
-- 👤 User (terverifikasi NIM)
-- 🏆 Data lomba
-- 🎓 Data mentor
-- ❓ FAQ
-- 🧠 Log permintaan mentoring + respon AI
+- 👤 User data (verified students)
+- 🏆 Competition data
+- 🎓 Mentor data
+- ❓ FAQ data
+- 🧠 Mentoring request logs + AI responses
 
 ---
 
 ## 🔄 Data Pipeline
 
-- Data lomba & FAQ diperbarui melalui **Google Sheets**
-- Sinkronisasi dilakukan via command `/sync` (admin)
-- Data kemudian disimpan di **Supabase**
+- Competition & FAQ data are maintained via **Google Sheets**
+- Data synchronization is triggered using `/sync` (admin command)
+- Synced data is stored in **Supabase**
 
 ---
 
 ## 🚀 Deployment
 
-- **Platform:** Koyeb (server di Frankfurt)
-- **Database:** Supabase (region Jepang)
+- **Platform:** Koyeb (Frankfurt region)
+- **Database:** Supabase (Japan region)
 - **AI API:** Groq Cloud
 
 ---
 
 ## ⚠️ Limitations & Challenges
 
-Beberapa kendala saat ini:
+Current limitations include:
 
-- ⏱️ Latensi cukup tinggi  
-  (Server di Frankfurt + DB di Jepang)
+- ⏱️ High latency  
+  (Geographical distance: Frankfurt server ↔ Japan database)
 
-- 🐢 Respons awal bot terkadang lambat
+- 🐢 Slow response on initial interactions
 
-- 🤖 AI masih berbasis prompt  
-  (belum fine-tuned / belum ada memory)
+- 🤖 AI is prompt-based  
+  (No fine-tuning or conversational memory yet)
 
-- 🌐 Bergantung pada API eksternal (Groq)
+- 🌐 Dependency on external APIs (Groq)
 
 ---
 
 ## 🚧 Future Improvements
 
-Pengembangan selanjutnya:
+Planned enhancements:
 
-- 🧠 Intent Classification (klasifikasi tujuan user)
+- 🧠 Intent Classification
 - 🔍 Named Entity Recognition (NER)
-- 💾 Session / Memory (context-aware conversation)
-- ⚡ Migrasi ke **FastAPI** (scalability & performance)
-- 📊 Logging & analytics penggunaan bot
-- 🔎 Semantic search untuk FAQ (vector database)
+- 💾 Session-based memory (context-aware conversations)
+- ⚡ Migration to **FastAPI** for better scalability
+- 📊 Logging & usage analytics
+- 🔎 Semantic FAQ search using vector database
 
 ---
 
@@ -162,7 +161,7 @@ Pengembangan selanjutnya:
 
 ---
 
-## ⚙️ Instalasi
+## ⚙️ Installation
 
 ```bash
 git clone https://github.com/username/bot-mentoring-si.git
@@ -172,50 +171,50 @@ pip install -r requirements.txt
 
 ### 🔑 Environment Variables
 
-Buat file `.env`:
+Create a `.env` file:
 
-```env
+```env id="b2m1xk"
 TELEGRAM_TOKEN=your_bot_token
 GROQ_API_KEY=your_groq_key
 ```
 
-### 📄 Setup Data
+### 📄 Data Setup
 
-* Tambahkan `credentials.json` dari Google Cloud
-* Pastikan Google Sheets sudah di-share ke service account
+* Add `credentials.json` from Google Cloud
+* Ensure your Google Sheets is shared with the service account
 
-### ▶️ Jalankan
+### ▶️ Run the Project
 
-```bash
+```bash id="7d2mza"
 python sync_sheets.py
 python bot.py
 ```
 
 ---
 
-## 📊 Status Proyek
+## 📊 Project Status
 
-* ✅ Sudah diuji coba internal (HIMSI SI UNAIR)
-* 🚀 Sudah deployed (Koyeb)
-* 🧪 Masih dalam tahap pengembangan (experimental system)
-
----
-
-## 👥 Target Pengguna
-
-Mahasiswa Sistem Informasi Universitas Airlangga, khususnya yang:
-
-* Membutuhkan mentoring lomba
-* Membutuhkan informasi akademik terkait kompetisi
+* ✅ Tested internally (HIMSI Information Systems UNAIR)
+* 🚀 Deployed on Koyeb
+* 🧪 Currently in experimental stage
 
 ---
 
-## 📌 Catatan
+## 👥 Target Users
 
-Proyek ini dikembangkan sebagai sistem awal (*experimental system*) untuk mengintegrasikan:
+Information Systems students at Universitas Airlangga who:
 
-* AI decision-making
-* Information system
-* Real-world academic workflow
+* Need competition mentoring
+* Require structured academic information
 
-Ke depannya, sistem ini dirancang untuk berkembang menjadi platform mentoring yang lebih scalable dan intelligent.
+---
+
+## 📌 Notes
+
+This project is developed as an *experimental system* integrating:
+
+* AI-driven decision making
+* Information systems
+* Real-world academic workflows
+
+The long-term goal is to evolve into a scalable and intelligent mentoring platform.
