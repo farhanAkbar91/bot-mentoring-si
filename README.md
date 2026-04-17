@@ -218,3 +218,5 @@ This project is developed as an *experimental system* integrating:
 * Real-world academic workflows
 
 The long-term goal is to evolve into a scalable and intelligent mentoring platform.
+
+**This project focuses on system design and AI integration rather than building custom machine learning models.**
